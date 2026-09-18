@@ -106,5 +106,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerFollow
   m_playerTransform: {fileID: 0}
-  m_offset: {x: -3.5, y: 2.5, z: -1.5}
+  m_offset: {x: -1.5, y: 1.5, z: 0}
   m_rotationSpeed: 10
