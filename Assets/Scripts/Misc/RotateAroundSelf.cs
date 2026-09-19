@@ -8,7 +8,7 @@ public class RotateAroundSelf : MonoBehaviour
     #region Main Updates
     private void Update()
     {
-        transform.rotation *= Quaternion.Euler(0, -5, 0);
+        transform.rotation *= Quaternion.Euler(0, -1, 0);
     }
     #endregion
 }

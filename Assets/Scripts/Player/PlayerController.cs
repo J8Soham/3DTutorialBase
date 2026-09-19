@@ -25,6 +25,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] 
     [Tooltip("List of all attacks.")]
     private PlayerAttackInfo[] m_attacks;
+
+    [SerializeField] 
+    [Tooltip("Maximum health of the player")] 
+    private int m_maxHealth;
+
+    [SerializeField] 
+    [Tooltip("The HUD script.")] 
+    private HUDController m_hud;
     #endregion
     
     #region Private Variables
@@ -32,6 +40,7 @@ public class PlayerController : MonoBehaviour
     // in order to do anything we can't be frozen.
     private float p_frozenTimer;
     private Color p_defaultColor;
+    private float p_curHealth;
     #endregion
 
     #region Initialization
@@ -41,8 +50,9 @@ public class PlayerController : MonoBehaviour
         cr_anim = GetComponent<Animator>();
         cr_renderer = GetComponentInChildren<Renderer>();
         p_defaultColor = cr_renderer.material.color;
-
         p_frozenTimer = 0;
+        p_curHealth = m_maxHealth;
+
         for (int i = 0; i < m_attacks.Length; i++) {
             PlayerAttackInfo attack = m_attacks[i];
             attack.Cooldown = 0;
@@ -72,6 +82,7 @@ public class PlayerController : MonoBehaviour
             if (attack.IsReady()) { 
                 if (Input.GetButtonDown(attack.Button)) { 
                     p_frozenTimer = attack.FrozenTime; 
+                    DecreaseHealth(attack.HealthCost);
                     StartCoroutine(UseAttack(attack)); 
                     break; 
                 }
@@ -108,7 +119,22 @@ public class PlayerController : MonoBehaviour
 
     #region Health Methods
     public void DecreaseHealth(float damage) {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        p_curHealth -= damage;
+        if (m_hud != null) { 
+            m_hud.UpdateHealth(1.0f * p_curHealth / m_maxHealth); 
+        }
+
+        if (p_curHealth <= 0) {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    public void IncreaseHealth(float amount) { 
+        p_curHealth += amount; 
+        if (p_curHealth > m_maxHealth) { 
+            p_curHealth = m_maxHealth;     
+        }
+        m_hud.UpdateHealth(p_curHealth / m_maxHealth);
     }
     #endregion
 
@@ -129,6 +155,15 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(attack.Cooldown); 
         
         attack.ResetCooldown();
+    }
+    #endregion
+
+    #region Collision Methods
+    private void OnTriggerEnter(Collider other) { 
+        if (other.CompareTag("HealthPill")) { 
+            IncreaseHealth(other.GetComponent<HealthPill>().HealthGain); 
+            Destroy(other.gameObject);
+        } 
     }
     #endregion
 

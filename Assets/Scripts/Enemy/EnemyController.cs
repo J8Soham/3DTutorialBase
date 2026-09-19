@@ -26,6 +26,14 @@ public class EnemyController : MonoBehaviour
     [SerializeField]
     [Tooltip("The explosion when enemy dies.")]
     private ParticleSystem m_deathExplosion;
+
+    [SerializeField] 
+    [Tooltip("Drop rate for health pill (0 to 1).")]
+    private float m_healthPillDropRate;
+
+    [SerializeField] 
+    [Tooltip("Type of health pill dropped.")]
+    private GameObject m_healthPill;
     #endregion
 
     #region Private Variables
@@ -71,8 +79,14 @@ public class EnemyController : MonoBehaviour
 
     #region Health Methods
     public void DecreaseHealth(float damage) {
-        Instantiate(m_deathExplosion, transform.position, Quaternion.identity);
-        Destroy(gameObject);
+        p_curHealth -= damage;
+        if (p_curHealth <= 0){
+            if (Random.value < m_healthPillDropRate) { 
+                Instantiate(m_healthPill, transform.position, Quaternion.identity); 
+            }
+            Instantiate(m_deathExplosion, transform.position, Quaternion.identity);
+            Destroy(gameObject);
+        }
     }
     #endregion
 
